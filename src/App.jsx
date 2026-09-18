@@ -36,6 +36,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="app__header">
+        <img src="/logo.png" alt="" className="app__logo" />
         <h1>Tic Tac Toe</h1>
         <p className="app__subtitle">Take turns, get three in a row.</p>
       </header>
@@ -49,6 +50,7 @@ export default function App() {
             onSquareClick={handleSquareClick}
             winningLine={result?.line}
             gameOver={gameOver}
+            xIsNext={xIsNext}
           />
 
           <button className="btn btn--primary" onClick={handleNewGame}>
