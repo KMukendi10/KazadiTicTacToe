@@ -1,17 +1,38 @@
 import { calculateWinner, isDraw } from "./calculateWinner";
+import { loadSaved } from "./storage";
 
 const emptyBoard = () => Array(9).fill(null);
 
-export const initialState = {
-  // Each entry is a full board snapshot: { squares, lastIndex }
-  // history[0] is always the empty starting board.
+const defaults = {
   history: [{ squares: emptyBoard(), lastIndex: null }],
   currentMove: 0,
   scores: { X: 0, O: 0, draws: 0 },
   // How many history entries have already been counted on the scoreboard,
   // so jumping back/forward through time travel never double-counts a result.
   scoredThroughLength: 1,
+  playerNames: { X: "Player X", O: "Player O" },
+  mode: "pvp", // "pvp" | "vsComputer"
+  difficulty: "easy", // "easy" | "unbeatable"
+  timerEnabled: false,
+  soundOn: true,
+  theme: "dark", // "dark" | "light"
 };
+
+// Lazy initializer for useReducer — restores settings (not the in-progress
+// board) from localStorage so a refresh doesn't wipe the scoreboard/prefs.
+export function createInitialState() {
+  const saved = loadSaved();
+  return {
+    ...defaults,
+    scores: saved?.scores ?? defaults.scores,
+    playerNames: saved?.playerNames ?? defaults.playerNames,
+    mode: saved?.mode ?? defaults.mode,
+    difficulty: saved?.difficulty ?? defaults.difficulty,
+    timerEnabled: saved?.timerEnabled ?? defaults.timerEnabled,
+    soundOn: saved?.soundOn ?? defaults.soundOn,
+    theme: saved?.theme ?? defaults.theme,
+  };
+}
 
 function scoreIfFinished(state, history) {
   const squares = history[history.length - 1].squares;
@@ -78,19 +99,44 @@ export function gameReducer(state, action) {
     }
 
     case "NEW_GAME": {
-      // Keep the scoreboard, wipe the board.
+      // Keep the scoreboard and settings, wipe the board.
       return {
         ...state,
         history: [{ squares: emptyBoard(), lastIndex: null }],
         currentMove: 0,
+        scoredThroughLength: 1,
       };
     }
 
     case "RESET_SCORES": {
+      return { ...state, scores: { X: 0, O: 0, draws: 0 } };
+    }
+
+    case "SET_PLAYER_NAME": {
       return {
         ...state,
-        scores: { X: 0, O: 0, draws: 0 },
+        playerNames: { ...state.playerNames, [action.mark]: action.name },
       };
+    }
+
+    case "SET_MODE": {
+      return { ...state, mode: action.mode };
+    }
+
+    case "SET_DIFFICULTY": {
+      return { ...state, difficulty: action.difficulty };
+    }
+
+    case "TOGGLE_TIMER": {
+      return { ...state, timerEnabled: !state.timerEnabled };
+    }
+
+    case "TOGGLE_SOUND": {
+      return { ...state, soundOn: !state.soundOn };
+    }
+
+    case "SET_THEME": {
+      return { ...state, theme: action.theme };
     }
 
     default:

@@ -1,5 +1,41 @@
 :root {
   color-scheme: dark;
+
+  --bg: #1b1f23;
+  --panel: #23282d;
+  --panel-border: #323942;
+  --grid-line: #3a4048;
+  --cell-bg: #23282d;
+  --cell-hover: #2c333a;
+  --cell-active: #333b43;
+  --text: #f1ece3;
+  --text-muted: #9ba3ac;
+  --accent-x: #7c6cf5;
+  --accent-o: #f5b14c;
+  --accent-x-soft: rgba(124, 108, 245, 0.18);
+  --accent-o-soft: rgba(245, 177, 76, 0.16);
+  --shadow: rgba(0, 0, 0, 0.28);
+  --input-bg: #1b1f23;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #f4f2ee;
+  --panel: #ffffff;
+  --panel-border: #e2ded6;
+  --grid-line: #d8d3c9;
+  --cell-bg: #ffffff;
+  --cell-hover: #f1eee7;
+  --cell-active: #e8e4da;
+  --text: #22262b;
+  --text-muted: #6b7280;
+  --accent-x: #6a53f0;
+  --accent-o: #d98f2b;
+  --accent-x-soft: rgba(106, 83, 240, 0.14);
+  --accent-o-soft: rgba(217, 143, 43, 0.16);
+  --shadow: rgba(0, 0, 0, 0.1);
+  --input-bg: #f4f2ee;
 }
 
 * {
@@ -13,9 +49,10 @@ html, body {
 
 body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
-  background: #1b1f23;
-  color: #f1ece3;
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 button {
