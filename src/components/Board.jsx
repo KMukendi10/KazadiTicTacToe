@@ -1,6 +1,6 @@
 import Square from "./Square";
 
-export default function Board({ squares, onSquareClick, winningLine, gameOver }) {
+export default function Board({ squares, onSquareClick, winningLine, gameOver, xIsNext }) {
   return (
     <div className="board">
       {squares.map((value, index) => (
@@ -10,6 +10,7 @@ export default function Board({ squares, onSquareClick, winningLine, gameOver })
           onClick={() => onSquareClick(index)}
           isWinning={winningLine?.includes(index)}
           disabled={gameOver}
+          previewValue={xIsNext ? "X" : "O"}
         />
       ))}
     </div>
