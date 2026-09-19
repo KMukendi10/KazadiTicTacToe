@@ -11,11 +11,31 @@ export default function SettingsPanel({
   onToggleSound,
   theme,
   onToggleTheme,
+  matchTarget,
+  onMatchTargetChange,
 }) {
   return (
     <section className="panel settings" aria-label="Game settings">
       <div className="panel__header">
         <h2>Settings</h2>
+      </div>
+
+      <div className="settings__row">
+        <label className="settings__label" htmlFor="match-target-select">
+          Race to
+        </label>
+        <select
+          id="match-target-select"
+          value={matchTarget ?? "off"}
+          onChange={(e) =>
+            onMatchTargetChange(e.target.value === "off" ? null : Number(e.target.value))
+          }
+        >
+          <option value="off">Off</option>
+          <option value="3">3 wins</option>
+          <option value="5">5 wins</option>
+          <option value="10">10 wins</option>
+        </select>
       </div>
 
       <div className="settings__row">

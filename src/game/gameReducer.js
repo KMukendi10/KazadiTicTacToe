@@ -18,6 +18,7 @@ const defaults = {
   soundOn: true,
   theme: "dark", // "dark" | "light"
   startingMark: "X", // who goes first this game — alternates each New Game
+  matchTarget: 10, // "race to N wins" — null means off
 };
 
 // Lazy initializer for useReducer — restores settings (not the in-progress
@@ -33,6 +34,7 @@ export function createInitialState() {
     timerEnabled: saved?.timerEnabled ?? defaults.timerEnabled,
     soundOn: saved?.soundOn ?? defaults.soundOn,
     theme: saved?.theme ?? defaults.theme,
+    matchTarget: saved?.matchTarget !== undefined ? saved.matchTarget : defaults.matchTarget,
   };
 }
 
@@ -188,6 +190,10 @@ export function gameReducer(state, action) {
 
     case "SET_THEME": {
       return { ...state, theme: action.theme };
+    }
+
+    case "SET_MATCH_TARGET": {
+      return { ...state, matchTarget: action.target };
     }
 
     default:

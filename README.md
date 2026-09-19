@@ -16,6 +16,9 @@ React TicTacToe built for the "First Day as a JR Frontend Intern" assignment.
 ## Extras
 - **Play vs Computer** — Easy (random) or Unbeatable (minimax), in `src/game/ai.js`
 - **Turn timer** — optional 10s per move; auto-plays a random move on timeout
+- **Alternating starter** — whoever goes first swaps each New Game (`src/game/turns.js`)
+- **Undo** — reverts the last move; correctly un-scores the scoreboard if that move had just won or drawn the round
+- **Race to N** — optional match mode (3 / 5 / 10 wins) on top of the regular scoreboard, with a match-winner banner
 - **Player names** — replace X/O in the status bar and scoreboard
 - **Sound effects** — synthesized with Web Audio (`src/game/sound.js`), no asset files, mutable
 - **Hand-drawn marks** — X/O are SVGs that draw themselves in with a stroke animation

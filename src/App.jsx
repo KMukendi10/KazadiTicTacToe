@@ -11,6 +11,7 @@ import Scoreboard from "./components/Scoreboard";
 import MoveHistory from "./components/MoveHistory";
 import SettingsPanel from "./components/SettingsPanel";
 import Confetti from "./components/Confetti";
+import MatchBanner from "./components/MatchBanner";
 import "./App.css";
 
 const TURN_SECONDS = 10;
@@ -31,6 +32,7 @@ export default function App() {
     soundOn,
     theme,
     startingMark,
+    matchTarget,
   } = state;
 
   const currentSquares = history[currentMove].squares;
@@ -41,6 +43,11 @@ export default function App() {
   const isComputerTurn =
     mode === "vsComputer" && !xIsNext && !gameOver;
   const canUndo = currentMove > 0 && !isComputerTurn;
+
+  const matchWinnerMark = matchTarget
+    ? ["X", "O"].find((mark) => scores[mark] >= matchTarget)
+    : undefined;
+  const matchOver = Boolean(matchWinnerMark);
 
   const [secondsLeft, setSecondsLeft] = useState(TURN_SECONDS);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -58,6 +65,7 @@ export default function App() {
       timerEnabled,
       soundOn,
       theme,
+      matchTarget,
     });
   }, [
     scores,
@@ -67,6 +75,7 @@ export default function App() {
     timerEnabled,
     soundOn,
     theme,
+    matchTarget,
   ]);
 
   // Apply the selected theme to the document.
@@ -183,6 +192,22 @@ export default function App() {
     });
   }
 
+  function handleNewMatch() {
+    dispatch({
+      type: "NEW_GAME",
+    });
+    dispatch({
+      type: "RESET_SCORES",
+    });
+  }
+
+  function handleMatchTargetChange(target) {
+    dispatch({
+      type: "SET_MATCH_TARGET",
+      target,
+    });
+  }
+
   function handleResetScores() {
     dispatch({
       type: "RESET_SCORES",
@@ -263,10 +288,10 @@ export default function App() {
           className="app__logo"
         />
 
-        <h1>Kaza Tic Tac Toe</h1>
+        <h1>Tic Tac Toe</h1>
 
         <p className="app__subtitle">
-          9 squares, 8 lines, 1 winner.
+          Take turns, get three in a row.
         </p>
       </header>
 
@@ -324,6 +349,8 @@ export default function App() {
               onToggleSound={handleToggleSound}
               theme={theme}
               onToggleTheme={handleToggleTheme}
+              matchTarget={matchTarget}
+              onMatchTargetChange={handleMatchTargetChange}
             />
           </aside>
         </div>
@@ -331,21 +358,30 @@ export default function App() {
 
       <main className="layout">
         <div className="layout__game">
-          <StatusBar
-            winner={result?.winner}
-            isDraw={draw}
-            xIsNext={xIsNext}
-            playerNames={playerNames}
-            secondsLeft={secondsLeft}
-            timerActive={timerActive}
-          />
+          {matchOver ? (
+            <MatchBanner
+              winnerName={playerNames[matchWinnerMark]?.trim() || `Player ${matchWinnerMark}`}
+              scores={scores}
+              matchTarget={matchTarget}
+              onNewMatch={handleNewMatch}
+            />
+          ) : (
+            <StatusBar
+              winner={result?.winner}
+              isDraw={draw}
+              xIsNext={xIsNext}
+              playerNames={playerNames}
+              secondsLeft={secondsLeft}
+              timerActive={timerActive}
+            />
+          )}
 
           <div className="board-wrap">
             <Board
               squares={currentSquares}
               onSquareClick={handleSquareClick}
               winningLine={result?.line}
-              gameOver={gameOver}
+              gameOver={gameOver || matchOver}
               xIsNext={xIsNext}
               disabled={isComputerTurn}
             />
@@ -355,22 +391,24 @@ export default function App() {
             )}
           </div>
 
-          <div className="button-row">
-            <button
-              className="btn"
-              onClick={handleUndo}
-              disabled={!canUndo}
-            >
-              Undo
-            </button>
+          {!matchOver && (
+            <div className="button-row">
+              <button
+                className="btn"
+                onClick={handleUndo}
+                disabled={!canUndo}
+              >
+                Undo
+              </button>
 
-            <button
-              className="btn btn--primary"
-              onClick={handleNewGame}
-            >
-              New Game
-            </button>
-          </div>
+              <button
+                className="btn btn--primary"
+                onClick={handleNewGame}
+              >
+                New Game
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="layout__side">

@@ -149,4 +149,15 @@ describe("gameReducer", () => {
 
     expect(state.scores.X).toBe(0);
   });
+
+  it("defaults to a race-to-10 match and can be changed or turned off", () => {
+    let state = createInitialState();
+    expect(state.matchTarget).toBe(10);
+
+    state = gameReducer(state, { type: "SET_MATCH_TARGET", target: 3 });
+    expect(state.matchTarget).toBe(3);
+
+    state = gameReducer(state, { type: "SET_MATCH_TARGET", target: null });
+    expect(state.matchTarget).toBeNull();
+  });
 });
