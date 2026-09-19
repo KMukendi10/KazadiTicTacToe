@@ -539,6 +539,47 @@
   font-size: 1rem;
 }
 
+.startover-trigger {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 20;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+
+  background: var(--panel);
+  color: var(--text);
+
+  padding: 0.65rem 0.95rem;
+
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  box-shadow: 0 8px 24px var(--shadow);
+
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.startover-trigger:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent-x);
+}
+
+.startover-trigger span:first-child {
+  font-size: 1rem;
+}
+
 /* Full-screen layer */
 
 .settings-drawer-layer {
@@ -763,6 +804,11 @@
   .settings-trigger {
     top: 0.8rem;
     left: 0.8rem;
+  }
+
+  .startover-trigger {
+    top: 0.8rem;
+    right: 0.8rem;
   }
 
   .settings-drawer {

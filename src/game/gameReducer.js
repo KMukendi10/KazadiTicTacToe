@@ -151,13 +151,16 @@ export function gameReducer(state, action) {
     }
 
     case "NEW_GAME": {
-      // Keep the scoreboard and settings, wipe the board, swap who starts.
+      // Keep the scoreboard and settings, wipe the board.
+      // Advancing to the next round of an ongoing match alternates who
+      // starts — but a full restart (new players, changed settings) always
+      // goes back to X, rather than continuing wherever the alternation left off.
       return {
         ...state,
         history: [{ squares: emptyBoard(), lastIndex: null }],
         currentMove: 0,
         scoredThroughLength: 1,
-        startingMark: otherMark(state.startingMark),
+        startingMark: action.resetStartingMark ? "X" : otherMark(state.startingMark),
       };
     }
 

@@ -114,6 +114,19 @@ describe("gameReducer", () => {
     expect(state.history[state.currentMove].squares[0]).toBe("O");
   });
 
+  it("resets the starting player back to X on a full restart, ignoring alternation", () => {
+    let state = createInitialState();
+    state = gameReducer(state, { type: "NEW_GAME" }); // O's turn to start now
+    expect(state.startingMark).toBe("O");
+
+    state = gameReducer(state, { type: "NEW_GAME", resetStartingMark: true });
+    expect(state.startingMark).toBe("X");
+
+    // And a further restart keeps it at X rather than toggling away again.
+    state = gameReducer(state, { type: "NEW_GAME", resetStartingMark: true });
+    expect(state.startingMark).toBe("X");
+  });
+
   it("undoes the last move", () => {
     let state = createInitialState();
     state = playMoves(state, [0, 1]);

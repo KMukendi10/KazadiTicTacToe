@@ -195,16 +195,42 @@ export default function App() {
   function handleNewMatch() {
     dispatch({
       type: "NEW_GAME",
+      resetStartingMark: true,
     });
     dispatch({
       type: "RESET_SCORES",
     });
   }
 
+  // A bigger reset than "New Match" — for when the people playing are
+  // changing, not just the score. Wipes everything and opens Settings
+  // so new names can be entered right away.
+  function handleStartOver() {
+    dispatch({
+      type: "NEW_GAME",
+      resetStartingMark: true,
+    });
+    dispatch({
+      type: "RESET_SCORES",
+    });
+    setSettingsOpen(true);
+  }
+
   function handleMatchTargetChange(target) {
     dispatch({
       type: "SET_MATCH_TARGET",
       target,
+    });
+
+    // Changing the race length mid-match makes the tally so far meaningless —
+    // start the match fresh under the new target.
+    dispatch({
+      type: "NEW_GAME",
+      resetStartingMark: true,
+    });
+
+    dispatch({
+      type: "RESET_SCORES",
     });
   }
 
@@ -228,8 +254,15 @@ export default function App() {
       mode: nextMode,
     });
 
+    // A PvP scoreboard and a vs-Computer scoreboard aren't the same contest —
+    // wipe both the board and the tally so nothing carries over.
     dispatch({
       type: "NEW_GAME",
+      resetStartingMark: true,
+    });
+
+    dispatch({
+      type: "RESET_SCORES",
     });
   }
 
@@ -237,6 +270,17 @@ export default function App() {
     dispatch({
       type: "SET_DIFFICULTY",
       difficulty: nextDifficulty,
+    });
+
+    // Same reasoning — wins against Easy and wins against Unbeatable
+    // shouldn't be tallied together.
+    dispatch({
+      type: "NEW_GAME",
+      resetStartingMark: true,
+    });
+
+    dispatch({
+      type: "RESET_SCORES",
     });
   }
 
@@ -305,6 +349,16 @@ export default function App() {
       >
         <span aria-hidden="true">⚙</span>
         <span>Settings</span>
+      </button>
+
+      {/* Full reset — new players, fresh scoreboard */}
+      <button
+        className="startover-trigger"
+        type="button"
+        onClick={handleStartOver}
+      >
+        <span aria-hidden="true">↺</span>
+        <span>Start Over</span>
       </button>
 
       {/* Settings sidebar */}
