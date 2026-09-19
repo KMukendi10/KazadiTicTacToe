@@ -290,6 +290,11 @@
 
 /* Buttons */
 
+.button-row {
+  display: flex;
+  gap: 0.6rem;
+}
+
 .btn {
   font-family: "Space Grotesk", sans-serif;
   font-weight: 600;
@@ -307,6 +312,16 @@
 
 .btn:hover {
   border-color: var(--accent-x);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  border-color: var(--grid-line);
+}
+
+.btn:disabled:hover {
+  border-color: var(--grid-line);
 }
 
 .btn--primary {

@@ -95,4 +95,58 @@ describe("gameReducer", () => {
     expect(state.soundOn).toBe(!initialSound);
     expect(state.timerEnabled).toBe(!initialTimer);
   });
+
+  it("alternates who starts after each new game", () => {
+    let state = createInitialState();
+    expect(state.startingMark).toBe("X");
+
+    state = gameReducer(state, { type: "NEW_GAME" });
+    expect(state.startingMark).toBe("O");
+
+    state = gameReducer(state, { type: "NEW_GAME" });
+    expect(state.startingMark).toBe("X");
+  });
+
+  it("lets O make the first move once O is the starting mark", () => {
+    let state = createInitialState();
+    state = gameReducer(state, { type: "NEW_GAME" }); // now O starts
+    state = gameReducer(state, { type: "MAKE_MOVE", index: 0 });
+    expect(state.history[state.currentMove].squares[0]).toBe("O");
+  });
+
+  it("undoes the last move", () => {
+    let state = createInitialState();
+    state = playMoves(state, [0, 1]);
+    state = gameReducer(state, { type: "UNDO" });
+    expect(state.history).toHaveLength(2);
+    expect(state.currentMove).toBe(1);
+    expect(state.history[1].squares[1]).toBeNull();
+  });
+
+  it("does nothing when there is nothing to undo", () => {
+    const state = createInitialState();
+    const result = gameReducer(state, { type: "UNDO" });
+    expect(result).toBe(state);
+  });
+
+  it("reverses a scored win when the winning move is undone", () => {
+    let state = createInitialState();
+    state = playMoves(state, [0, 3, 1, 4, 2]); // X wins the top row
+    expect(state.scores.X).toBe(1);
+
+    state = gameReducer(state, { type: "UNDO" });
+    expect(state.scores.X).toBe(0);
+    expect(state.history).toHaveLength(5);
+  });
+
+  it("reverses a scored result when branching off after time travel discards it", () => {
+    let state = createInitialState();
+    state = playMoves(state, [0, 3, 1, 4, 2]); // X wins the top row
+    expect(state.scores.X).toBe(1);
+
+    state = gameReducer(state, { type: "JUMP_TO_MOVE", move: 1 });
+    state = gameReducer(state, { type: "MAKE_MOVE", index: 4 }); // branch away from the win
+
+    expect(state.scores.X).toBe(0);
+  });
 });

@@ -1,5 +1,6 @@
 import { calculateWinner, isDraw } from "./calculateWinner";
 import { loadSaved } from "./storage";
+import { markForMove, otherMark } from "./turns";
 
 const emptyBoard = () => Array(9).fill(null);
 
@@ -16,6 +17,7 @@ const defaults = {
   timerEnabled: false,
   soundOn: true,
   theme: "dark", // "dark" | "light"
+  startingMark: "X", // who goes first this game — alternates each New Game
 };
 
 // Lazy initializer for useReducer — restores settings (not the in-progress
@@ -59,6 +61,29 @@ function scoreIfFinished(state, history) {
   return { scores: state.scores, scoredThroughLength: state.scoredThroughLength };
 }
 
+// If a result was already counted on the scoreboard but the history entry it
+// came from is about to fall outside the reachable timeline — because Undo
+// removed it, or because a new move branches off from an earlier point in
+// time travel — that score needs to be reversed. Otherwise it's stuck on the
+// board even though the game that earned it no longer exists.
+function reverseScoreIfNowUnreachable(state, newLength) {
+  if (state.scoredThroughLength <= newLength) {
+    return { scores: state.scores, scoredThroughLength: state.scoredThroughLength };
+  }
+
+  const scoredSquares = state.history[state.scoredThroughLength - 1].squares;
+  const scoredResult = calculateWinner(scoredSquares);
+  let scores = state.scores;
+
+  if (scoredResult) {
+    scores = { ...scores, [scoredResult.winner]: scores[scoredResult.winner] - 1 };
+  } else if (isDraw(scoredSquares)) {
+    scores = { ...scores, draws: scores.draws - 1 };
+  }
+
+  return { scores, scoredThroughLength: newLength };
+}
+
 export function gameReducer(state, action) {
   switch (action.type) {
     case "MAKE_MOVE": {
@@ -71,22 +96,47 @@ export function gameReducer(state, action) {
         return state; // ignore filled cells / moves after game over
       }
 
-      const xIsNext = state.currentMove % 2 === 0;
-      const nextSquares = currentSquares.slice();
-      nextSquares[index] = xIsNext ? "X" : "O";
+      // Branch off from the current move — any "future" from an undo/jump is
+      // discarded. If that future had already been scored, reverse it first.
+      const truncatedLength = state.currentMove + 1;
+      const cleared = reverseScoreIfNowUnreachable(state, truncatedLength);
 
-      // Branch off from the current move — any "future" from an undo/jump is discarded.
+      const mark = markForMove(state.currentMove, state.startingMark);
+      const nextSquares = currentSquares.slice();
+      nextSquares[index] = mark;
+
       const nextHistory = [
-        ...state.history.slice(0, state.currentMove + 1),
+        ...state.history.slice(0, truncatedLength),
         { squares: nextSquares, lastIndex: index },
       ];
 
-      const { scores, scoredThroughLength } = scoreIfFinished(state, nextHistory);
+      const { scores, scoredThroughLength } = scoreIfFinished(
+        { ...state, scores: cleared.scores, scoredThroughLength: cleared.scoredThroughLength },
+        nextHistory
+      );
 
       return {
         ...state,
         history: nextHistory,
         currentMove: nextHistory.length - 1,
+        scores,
+        scoredThroughLength,
+      };
+    }
+
+    case "UNDO": {
+      if (state.currentMove === 0) return state; // nothing to undo
+
+      const newCurrentMove = state.currentMove - 1;
+      const { scores, scoredThroughLength } = reverseScoreIfNowUnreachable(
+        state,
+        newCurrentMove + 1
+      );
+
+      return {
+        ...state,
+        history: state.history.slice(0, newCurrentMove + 1),
+        currentMove: newCurrentMove,
         scores,
         scoredThroughLength,
       };
@@ -99,12 +149,13 @@ export function gameReducer(state, action) {
     }
 
     case "NEW_GAME": {
-      // Keep the scoreboard and settings, wipe the board.
+      // Keep the scoreboard and settings, wipe the board, swap who starts.
       return {
         ...state,
         history: [{ squares: emptyBoard(), lastIndex: null }],
         currentMove: 0,
         scoredThroughLength: 1,
+        startingMark: otherMark(state.startingMark),
       };
     }
 

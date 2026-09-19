@@ -2,6 +2,7 @@ import { useEffect, useReducer, useRef, useState } from "react";
 import { gameReducer, createInitialState } from "./game/gameReducer";
 import { calculateWinner, isDraw } from "./game/calculateWinner";
 import { getComputerMove, getRandomMove } from "./game/ai";
+import { markForMove } from "./game/turns";
 import { playMoveSound, playWinSound, playDrawSound } from "./game/sound";
 import { saveState } from "./game/storage";
 import Board from "./components/Board";
@@ -29,15 +30,17 @@ export default function App() {
     timerEnabled,
     soundOn,
     theme,
+    startingMark,
   } = state;
 
   const currentSquares = history[currentMove].squares;
   const result = calculateWinner(currentSquares);
   const draw = !result && isDraw(currentSquares);
   const gameOver = Boolean(result) || draw;
-  const xIsNext = currentMove % 2 === 0;
+  const xIsNext = markForMove(currentMove, startingMark) === "X";
   const isComputerTurn =
     mode === "vsComputer" && !xIsNext && !gameOver;
+  const canUndo = currentMove > 0 && !isComputerTurn;
 
   const [secondsLeft, setSecondsLeft] = useState(TURN_SECONDS);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -168,6 +171,12 @@ export default function App() {
     });
   }
 
+  function handleUndo() {
+    dispatch({
+      type: "UNDO",
+    });
+  }
+
   function handleNewGame() {
     dispatch({
       type: "NEW_GAME",
@@ -254,10 +263,10 @@ export default function App() {
           className="app__logo"
         />
 
-        <h1>Tic Tac Toe</h1>
+        <h1>Kaza Tic Tac Toe</h1>
 
         <p className="app__subtitle">
-          Take turns, get three in a row.
+          9 squares, 8 lines, 1 winner.
         </p>
       </header>
 
@@ -346,12 +355,22 @@ export default function App() {
             )}
           </div>
 
-          <button
-            className="btn btn--primary"
-            onClick={handleNewGame}
-          >
-            New Game
-          </button>
+          <div className="button-row">
+            <button
+              className="btn"
+              onClick={handleUndo}
+              disabled={!canUndo}
+            >
+              Undo
+            </button>
+
+            <button
+              className="btn btn--primary"
+              onClick={handleNewGame}
+            >
+              New Game
+            </button>
+          </div>
         </div>
 
         <div className="layout__side">
@@ -365,6 +384,7 @@ export default function App() {
             history={history}
             currentMove={currentMove}
             onJumpTo={handleJumpTo}
+            startingMark={startingMark}
           />
         </div>
       </main>

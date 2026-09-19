@@ -1,12 +1,14 @@
-function describeMove(entry, index) {
+import { markForMove } from "../game/turns";
+
+function describeMove(entry, index, startingMark) {
   if (index === 0) return "Game start";
   const row = Math.floor(entry.lastIndex / 3) + 1;
   const col = (entry.lastIndex % 3) + 1;
-  const player = index % 2 === 1 ? "X" : "O";
+  const player = markForMove(index - 1, startingMark);
   return `Move #${index} — ${player} → row ${row}, col ${col}`;
 }
 
-export default function MoveHistory({ history, currentMove, onJumpTo }) {
+export default function MoveHistory({ history, currentMove, onJumpTo, startingMark }) {
   return (
     <section className="panel move-history" aria-label="Move history">
       <div className="panel__header">
@@ -22,7 +24,7 @@ export default function MoveHistory({ history, currentMove, onJumpTo }) {
                 onClick={() => onJumpTo(index)}
                 aria-current={isCurrent}
               >
-                {describeMove(entry, index)}
+                {describeMove(entry, index, startingMark)}
                 {isCurrent && <span className="move-history__tag">current</span>}
               </button>
             </li>
