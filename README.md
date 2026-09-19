@@ -14,7 +14,7 @@ React TicTacToe built for the "First Day as a JR Frontend Intern" assignment.
 - **Advanced feature:** Move History + Time Travel — click any past move to jump the board back to that state; a new move from a jumped-back state branches off (discards the old future)
 
 ## Extras
-- **Play vs Computer** — Easy (random) or Unbeatable (minimax), in `src/game/ai.js`
+- **Play vs Computer** — four difficulty tiers in `src/game/ai.js`: **Easy** (random), **Medium** (takes an immediate win, blocks an immediate loss, otherwise random), **Hard** (mostly-optimal minimax, occasionally slips into Medium-level play), **Unbeatable** (perfect minimax)
 - **Turn timer** — optional 10s per move; auto-plays a random move on timeout
 - **Alternating starter** — whoever goes first swaps each New Game (`src/game/turns.js`)
 - **Undo** — reverts the last move; correctly un-scores the scoreboard if that move had just won or drawn the round

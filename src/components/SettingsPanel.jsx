@@ -59,6 +59,8 @@ export default function SettingsPanel({
             onChange={(e) => onDifficultyChange(e.target.value)}
           >
             <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
             <option value="unbeatable">Unbeatable</option>
           </select>
         </div>
