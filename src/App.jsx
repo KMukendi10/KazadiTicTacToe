@@ -52,8 +52,9 @@ export default function App() {
 
   // Whether there's anything on the board or scoreboard worth warning
   // someone before wiping — no point nagging on a completely fresh game.
-  const hasProgress =
-    currentMove > 0 || scores.X > 0 || scores.O > 0 || scores.draws > 0;
+  const hasCompletedRound =
+    scores.X > 0 || scores.O > 0 || scores.draws > 0;
+  const hasProgress = currentMove > 0 || hasCompletedRound;
 
   const matchWinnerMark = matchTarget
     ? ["X", "O"].find((mark) => scores[mark] >= matchTarget)
@@ -471,11 +472,19 @@ export default function App() {
         <span>Settings</span>
       </button>
 
-      {/* Full reset — new players, fresh scoreboard */}
+      {/* Full reset — new players, fresh scoreboard.
+          Nothing to start over from until a move has been made or a
+          round has been won, so it stays disabled until then. */}
       <button
         className="startover-trigger"
         type="button"
         onClick={handleStartOver}
+        disabled={!hasProgress}
+        title={
+          hasProgress
+            ? undefined
+            : "Nothing to start over yet — make a move first"
+        }
       >
         <span aria-hidden="true">↺</span>
         <span>Start Over</span>
@@ -598,6 +607,7 @@ export default function App() {
           <Scoreboard
             scores={scores}
             onResetScores={handleResetScores}
+            canReset={hasCompletedRound}
             playerNames={playerNames}
           />
 

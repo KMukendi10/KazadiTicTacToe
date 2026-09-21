@@ -379,8 +379,14 @@
   text-underline-offset: 2px;
 }
 
-.link-btn:hover {
+.link-btn:hover:not(:disabled) {
   color: var(--text);
+}
+
+.link-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: none;
 }
 
 /* Panels */
@@ -571,9 +577,16 @@
     background-color 0.15s ease;
 }
 
-.startover-trigger:hover {
+.startover-trigger:hover:not(:disabled) {
   transform: translateY(-1px);
   border-color: var(--accent-x);
+}
+
+.startover-trigger:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
 .startover-trigger span:first-child {

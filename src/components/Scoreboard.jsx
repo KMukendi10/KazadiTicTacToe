@@ -1,4 +1,9 @@
-export default function Scoreboard({ scores, onResetScores, playerNames }) {
+export default function Scoreboard({
+  scores,
+  onResetScores,
+  canReset = true,
+  playerNames,
+}) {
   const nameX = playerNames.X?.trim() || "Player X";
   const nameO = playerNames.O?.trim() || "Player O";
 
@@ -6,7 +11,17 @@ export default function Scoreboard({ scores, onResetScores, playerNames }) {
     <section className="panel scoreboard" aria-label="Scoreboard">
       <div className="panel__header">
         <h2>Scoreboard</h2>
-        <button className="link-btn" onClick={onResetScores}>
+        <button
+          className="link-btn"
+          type="button"
+          onClick={onResetScores}
+          disabled={!canReset}
+          title={
+            canReset
+              ? undefined
+              : "Nothing to reset yet — finish a round first"
+          }
+        >
           Reset Game
         </button>
       </div>
