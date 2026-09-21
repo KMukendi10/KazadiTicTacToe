@@ -12,14 +12,19 @@ import MoveHistory from "./components/MoveHistory";
 import SettingsPanel from "./components/SettingsPanel";
 import Confetti from "./components/Confetti";
 import MatchBanner from "./components/MatchBanner";
+import Loader from "./components/Loader";
+import ConfirmDialog from "./components/ConfirmDialog";
 import "./App.css";
 
 const TURN_SECONDS = 10;
 const COMPUTER_MARK = "O";
 const HUMAN_MARK = "X";
+const LOADER_DURATION_MS = 1100;
 
 export default function App() {
   const [state, dispatch] = useReducer(gameReducer, null, createInitialState);
+  const [isLoading, setIsLoading] = useState(true);
+  const [confirmState, setConfirmState] = useState(null);
 
   const {
     history,
@@ -44,6 +49,11 @@ export default function App() {
     mode === "vsComputer" && !xIsNext && !gameOver;
   const canUndo = currentMove > 0 && !isComputerTurn;
 
+  // Whether there's anything on the board or scoreboard worth warning
+  // someone before wiping — no point nagging on a completely fresh game.
+  const hasProgress =
+    currentMove > 0 || scores.X > 0 || scores.O > 0 || scores.draws > 0;
+
   const matchWinnerMark = matchTarget
     ? ["X", "O"].find((mark) => scores[mark] >= matchTarget)
     : undefined;
@@ -54,6 +64,12 @@ export default function App() {
 
   const timerActive =
     timerEnabled && !gameOver && !isComputerTurn;
+
+  // Brief splash screen on first load.
+  useEffect(() => {
+    const timeout = setTimeout(() => setIsLoading(false), LOADER_DURATION_MS);
+    return () => clearTimeout(timeout);
+  }, []);
 
   // Persist scores + settings across refreshes.
   useEffect(() => {
@@ -85,7 +101,7 @@ export default function App() {
 
   // Computer's move.
   useEffect(() => {
-    if (!isComputerTurn) return;
+    if (!isComputerTurn || isLoading) return;
 
     const timeout = setTimeout(() => {
       const move = getComputerMove(
@@ -107,11 +123,11 @@ export default function App() {
 
     // currentSquares changes identity every move.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isComputerTurn, currentSquares, difficulty]);
+  }, [isComputerTurn, currentSquares, difficulty, isLoading]);
 
   // Turn timer.
   useEffect(() => {
-    if (!timerActive) return undefined;
+    if (!timerActive || isLoading) return undefined;
 
     setSecondsLeft(TURN_SECONDS);
 
@@ -120,7 +136,7 @@ export default function App() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timerActive, currentMove]);
+  }, [timerActive, currentMove, isLoading]);
 
   // Automatically make a random move when timer reaches zero.
   useEffect(() => {
@@ -164,6 +180,19 @@ export default function App() {
     prevGameOver.current = gameOver;
   }, [gameOver, result, draw, soundOn]);
 
+  function requestConfirm(message, onConfirm) {
+    setConfirmState({ message, onConfirm });
+  }
+
+  function handleConfirmYes() {
+    confirmState?.onConfirm();
+    setConfirmState(null);
+  }
+
+  function handleConfirmCancel() {
+    setConfirmState(null);
+  }
+
   function handleSquareClick(index) {
     if (isComputerTurn) return;
 
@@ -206,32 +235,48 @@ export default function App() {
   // changing, not just the score. Wipes everything and opens Settings
   // so new names can be entered right away.
   function handleStartOver() {
-    dispatch({
-      type: "NEW_GAME",
-      resetStartingMark: true,
-    });
-    dispatch({
-      type: "RESET_SCORES",
-    });
-    setSettingsOpen(true);
+    requestConfirm(
+      "Start over? This clears the board and resets the scoreboard to zero.",
+      () => {
+        dispatch({
+          type: "NEW_GAME",
+          resetStartingMark: true,
+        });
+        dispatch({
+          type: "RESET_SCORES",
+        });
+        setSettingsOpen(true);
+      }
+    );
   }
 
   function handleMatchTargetChange(target) {
-    dispatch({
-      type: "SET_MATCH_TARGET",
-      target,
-    });
+    const applyChange = () => {
+      dispatch({
+        type: "SET_MATCH_TARGET",
+        target,
+      });
 
-    // Changing the race length mid-match makes the tally so far meaningless —
-    // start the match fresh under the new target.
-    dispatch({
-      type: "NEW_GAME",
-      resetStartingMark: true,
-    });
+      // Changing the race length mid-match makes the tally so far meaningless —
+      // start the match fresh under the new target.
+      dispatch({
+        type: "NEW_GAME",
+        resetStartingMark: true,
+      });
 
-    dispatch({
-      type: "RESET_SCORES",
-    });
+      dispatch({
+        type: "RESET_SCORES",
+      });
+    };
+
+    if (hasProgress) {
+      requestConfirm(
+        "Changing the race length will restart the board and reset the scoreboard. Continue?",
+        applyChange
+      );
+    } else {
+      applyChange();
+    }
   }
 
   function handleResetScores() {
@@ -249,39 +294,61 @@ export default function App() {
   }
 
   function handleModeChange(nextMode) {
-    dispatch({
-      type: "SET_MODE",
-      mode: nextMode,
-    });
+    const applyChange = () => {
+      dispatch({
+        type: "SET_MODE",
+        mode: nextMode,
+      });
 
-    // A PvP scoreboard and a vs-Computer scoreboard aren't the same contest —
-    // wipe both the board and the tally so nothing carries over.
-    dispatch({
-      type: "NEW_GAME",
-      resetStartingMark: true,
-    });
+      // A PvP scoreboard and a vs-Computer scoreboard aren't the same contest —
+      // wipe both the board and the tally so nothing carries over.
+      dispatch({
+        type: "NEW_GAME",
+        resetStartingMark: true,
+      });
 
-    dispatch({
-      type: "RESET_SCORES",
-    });
+      dispatch({
+        type: "RESET_SCORES",
+      });
+    };
+
+    if (hasProgress) {
+      requestConfirm(
+        "Changing the opponent will restart the board and reset the scoreboard. Continue?",
+        applyChange
+      );
+    } else {
+      applyChange();
+    }
   }
 
   function handleDifficultyChange(nextDifficulty) {
-    dispatch({
-      type: "SET_DIFFICULTY",
-      difficulty: nextDifficulty,
-    });
+    const applyChange = () => {
+      dispatch({
+        type: "SET_DIFFICULTY",
+        difficulty: nextDifficulty,
+      });
 
-    // Same reasoning — wins against Easy and wins against Unbeatable
-    // shouldn't be tallied together.
-    dispatch({
-      type: "NEW_GAME",
-      resetStartingMark: true,
-    });
+      // Same reasoning — wins against Easy and wins against Unbeatable
+      // shouldn't be tallied together.
+      dispatch({
+        type: "NEW_GAME",
+        resetStartingMark: true,
+      });
 
-    dispatch({
-      type: "RESET_SCORES",
-    });
+      dispatch({
+        type: "RESET_SCORES",
+      });
+    };
+
+    if (hasProgress) {
+      requestConfirm(
+        "Changing the difficulty will restart the board and reset the scoreboard. Continue?",
+        applyChange
+      );
+    } else {
+      applyChange();
+    }
   }
 
   function handleToggleTimer() {
@@ -322,6 +389,36 @@ export default function App() {
       document.body.style.overflow = "";
     };
   }, [settingsOpen]);
+
+  // Same treatment for the confirm dialog — Escape cancels it, and it
+  // locks scrolling while open (skip the lock if Settings already did it).
+  useEffect(() => {
+    if (!confirmState) return undefined;
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") {
+        handleConfirmCancel();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    if (!settingsOpen) {
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      if (!settingsOpen) {
+        document.body.style.overflow = "";
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [confirmState, settingsOpen]);
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <div className="app">
@@ -408,6 +505,15 @@ export default function App() {
             />
           </aside>
         </div>
+      )}
+
+      {/* Confirmation dialog for anything that would restart the game */}
+      {confirmState && (
+        <ConfirmDialog
+          message={confirmState.message}
+          onConfirm={handleConfirmYes}
+          onCancel={handleConfirmCancel}
+        />
       )}
 
       <main className="layout">

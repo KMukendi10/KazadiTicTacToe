@@ -759,6 +759,148 @@
 }
 
 /* ==========================================
+   LOADER (splash screen)
+   ========================================== */
+
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+
+  background: var(--bg);
+}
+
+.loader__ring {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  animation: loader-orbit 1.3s linear infinite;
+}
+
+.loader__mark {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+}
+
+.loader__mark--x {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--accent-x);
+}
+
+.loader__mark--o {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--accent-o);
+}
+
+.loader__mark-inner {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: loader-orbit-reverse 1.3s linear infinite;
+}
+
+.loader__text {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+@keyframes loader-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loader-orbit-reverse {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+/* ==========================================
+   CONFIRM DIALOG
+   ========================================== */
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+
+  background: rgba(0, 0, 0, 0.55);
+  animation: settings-overlay-in 0.15s ease;
+}
+
+.confirm-dialog {
+  width: min(360px, 100%);
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+  animation: confirm-dialog-in 0.15s ease;
+}
+
+.confirm-dialog__message {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text);
+  text-align: center;
+}
+
+.confirm-dialog__actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.confirm-dialog__actions .btn {
+  flex: 1;
+}
+
+@keyframes confirm-dialog-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ==========================================
    SIDEBAR ANIMATIONS
    ========================================== */
 

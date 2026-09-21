@@ -26,6 +26,8 @@ React TicTacToe built for the "First Day as a JR Frontend Intern" assignment.
 - **Keyboard play** — arrow keys move focus around the board, Enter/Space to place a mark
 - **Light/dark theme** — CSS variables in `src/index.css`, toggle in Settings
 - **Persistence** — scores and settings (not the in-progress board) survive a refresh via `localStorage` (`src/game/storage.js`)
+- **Splash loader** — a brief spinning X/O animation on first load (`src/components/Loader.jsx`)
+- **Confirm dialogs** — Start Over always asks first; changing Opponent, Difficulty, or Race-to-N only asks if there's a board or scoreboard in progress to lose (`src/components/ConfirmDialog.jsx`)
 
 ## Run locally
 ```
