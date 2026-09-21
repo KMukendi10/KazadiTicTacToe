@@ -19,11 +19,12 @@ import "./App.css";
 const TURN_SECONDS = 10;
 const COMPUTER_MARK = "O";
 const HUMAN_MARK = "X";
-const LOADER_DURATION_MS = 1100;
+const LOADER_DURATION_MS = 2500;
 
 export default function App() {
   const [state, dispatch] = useReducer(gameReducer, null, createInitialState);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadProgress, setLoadProgress] = useState(0);
   const [confirmState, setConfirmState] = useState(null);
 
   const {
@@ -65,10 +66,23 @@ export default function App() {
   const timerActive =
     timerEnabled && !gameOver && !isComputerTurn;
 
-  // Brief splash screen on first load.
+  // Splash screen with a progress bar that fills up to 100%.
   useEffect(() => {
-    const timeout = setTimeout(() => setIsLoading(false), LOADER_DURATION_MS);
-    return () => clearTimeout(timeout);
+    const startedAt = Date.now();
+
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startedAt;
+      const percent = Math.min(100, Math.round((elapsed / LOADER_DURATION_MS) * 100));
+      setLoadProgress(percent);
+
+      if (percent >= 100) {
+        clearInterval(interval);
+        // Hold briefly at 100% so it doesn't vanish the instant it fills.
+        setTimeout(() => setIsLoading(false), 200);
+      }
+    }, 40);
+
+    return () => clearInterval(interval);
   }, []);
 
   // Persist scores + settings across refreshes.
@@ -280,9 +294,18 @@ export default function App() {
   }
 
   function handleResetScores() {
-    dispatch({
-      type: "RESET_SCORES",
-    });
+    requestConfirm(
+      "Reset the game? This clears the board and resets the scoreboard to zero.",
+      () => {
+        dispatch({
+          type: "NEW_GAME",
+          resetStartingMark: true,
+        });
+        dispatch({
+          type: "RESET_SCORES",
+        });
+      }
+    );
   }
 
   function handleNameChange(mark, name) {
@@ -417,7 +440,7 @@ export default function App() {
   }, [confirmState, settingsOpen]);
 
   if (isLoading) {
-    return <Loader />;
+    return <Loader progress={loadProgress} />;
   }
 
   return (

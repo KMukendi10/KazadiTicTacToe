@@ -817,6 +817,31 @@
   letter-spacing: 0.02em;
 }
 
+.loader__bar-track {
+  width: min(220px, 70vw);
+  height: 8px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  overflow: hidden;
+}
+
+.loader__bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-x), var(--accent-o));
+  transition: width 0.1s linear;
+}
+
+.loader__percent {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  margin: -0.5rem 0 0;
+}
+
 @keyframes loader-orbit {
   from {
     transform: rotate(0deg);

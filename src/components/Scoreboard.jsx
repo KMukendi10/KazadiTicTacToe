@@ -7,7 +7,7 @@ export default function Scoreboard({ scores, onResetScores, playerNames }) {
       <div className="panel__header">
         <h2>Scoreboard</h2>
         <button className="link-btn" onClick={onResetScores}>
-          Reset
+          Reset Game
         </button>
       </div>
       <div className="scoreboard__grid">

@@ -1,6 +1,6 @@
 import MarkIcon from "./MarkIcon";
 
-export default function Loader() {
+export default function Loader({ progress }) {
   return (
     <div className="loader" role="status" aria-live="polite">
       <div className="loader__ring">
@@ -15,7 +15,14 @@ export default function Loader() {
           </span>
         </span>
       </div>
+
       <p className="loader__text">Loading…</p>
+
+      <div className="loader__bar-track">
+        <div className="loader__bar-fill" style={{ width: `${progress}%` }} />
+      </div>
+
+      <p className="loader__percent">{progress}%</p>
     </div>
   );
 }
