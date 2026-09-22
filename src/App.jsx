@@ -48,7 +48,6 @@ export default function App() {
   const xIsNext = markForMove(currentMove, startingMark) === "X";
   const isComputerTurn =
     mode === "vsComputer" && !xIsNext && !gameOver;
-  const canUndo = currentMove > 0 && !isComputerTurn;
 
   // Whether there's anything on the board or scoreboard worth warning
   // someone before wiping — no point nagging on a completely fresh game.
@@ -221,12 +220,6 @@ export default function App() {
     dispatch({
       type: "JUMP_TO_MOVE",
       move,
-    });
-  }
-
-  function handleUndo() {
-    dispatch({
-      type: "UNDO",
     });
   }
 
@@ -585,14 +578,6 @@ export default function App() {
 
           {!matchOver && (
             <div className="button-row">
-              <button
-                className="btn"
-                onClick={handleUndo}
-                disabled={!canUndo}
-              >
-                Undo
-              </button>
-
               <button
                 className="btn btn--primary"
                 onClick={handleNewGame}
