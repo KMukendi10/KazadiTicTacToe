@@ -2,7 +2,7 @@ import { useEffect, useReducer, useRef, useState } from "react";
 import { gameReducer, createInitialState } from "./game/gameReducer";
 import { calculateWinner, isDraw } from "./game/calculateWinner";
 import { getComputerMove, getRandomMove } from "./game/ai";
-import { markForMove } from "./game/turns";
+import { markForMove, otherMark } from "./game/turns";
 import { playMoveSound, playWinSound, playDrawSound } from "./game/sound";
 import { saveState } from "./game/storage";
 import Board from "./components/Board";
@@ -19,8 +19,6 @@ import GameBackground from "./components/GameBackground";
 import "./App.css";
 
 const TURN_SECONDS = 10;
-const COMPUTER_MARK = "O";
-const HUMAN_MARK = "X";
 const LOADER_DURATION_MS = 2500;
 
 export default function App() {
@@ -38,6 +36,7 @@ export default function App() {
     playerNames,
     mode,
     difficulty,
+    humanMark,
     timerEnabled,
     soundOn,
     theme,
@@ -45,19 +44,21 @@ export default function App() {
     matchTarget,
   } = state;
 
+  const computerMark = otherMark(humanMark);
+
   const currentSquares = history[currentMove].squares;
   const result = calculateWinner(currentSquares);
   const draw = !result && isDraw(currentSquares);
   const gameOver = Boolean(result) || draw;
-  const xIsNext = markForMove(currentMove, startingMark) === "X";
+  const currentMark = markForMove(currentMove, startingMark);
+  const xIsNext = currentMark === "X";
   const isComputerTurn =
-    mode === "vsComputer" && !xIsNext && !gameOver;
+    mode === "vsComputer" && currentMark === computerMark && !gameOver;
 
   // Whether there's anything on the board or scoreboard worth warning
   // someone before wiping — no point nagging on a completely fresh game.
   const hasCompletedRound =
     scores.X > 0 || scores.O > 0 || scores.draws > 0;
-  const hasProgress = currentMove > 0 || hasCompletedRound;
 
   const matchWinnerMark = matchTarget
     ? ["X", "O"].find((mark) => scores[mark] >= matchTarget)
@@ -97,6 +98,7 @@ export default function App() {
       scores,
       mode,
       difficulty,
+      humanMark,
       timerEnabled,
       soundOn,
       theme,
@@ -106,6 +108,7 @@ export default function App() {
     scores,
     mode,
     difficulty,
+    humanMark,
     timerEnabled,
     soundOn,
     theme,
@@ -125,8 +128,8 @@ export default function App() {
       const move = getComputerMove(
         currentSquares,
         difficulty,
-        COMPUTER_MARK,
-        HUMAN_MARK
+        computerMark,
+        humanMark
       );
 
       if (move !== null && move !== undefined) {
@@ -141,7 +144,7 @@ export default function App() {
 
     // currentSquares changes identity every move.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isComputerTurn, currentSquares, difficulty, isLoading, setupOpen]);
+  }, [isComputerTurn, currentSquares, difficulty, humanMark, computerMark, isLoading, setupOpen]);
 
   // Turn timer.
   useEffect(() => {
@@ -233,7 +236,13 @@ export default function App() {
     });
   }
 
-  function handleSetupStart({ mode: chosenMode, difficulty: chosenDifficulty, names, matchTarget: chosenMatchTarget }) {
+  function handleSetupStart({
+    mode: chosenMode,
+    difficulty: chosenDifficulty,
+    humanMark: chosenHumanMark,
+    names,
+    matchTarget: chosenMatchTarget,
+  }) {
     dispatch({
       type: "SET_MODE",
       mode: chosenMode,
@@ -243,6 +252,11 @@ export default function App() {
       dispatch({
         type: "SET_DIFFICULTY",
         difficulty: chosenDifficulty,
+      });
+
+      dispatch({
+        type: "SET_HUMAN_MARK",
+        mark: chosenHumanMark,
       });
     }
 
@@ -292,35 +306,6 @@ export default function App() {
     setSetupOpen(true);
   }
 
-  function handleMatchTargetChange(target) {
-    const applyChange = () => {
-      dispatch({
-        type: "SET_MATCH_TARGET",
-        target,
-      });
-
-      // Changing the race length mid-match makes the tally so far meaningless —
-      // start the match fresh under the new target.
-      dispatch({
-        type: "NEW_GAME",
-        resetStartingMark: true,
-      });
-
-      dispatch({
-        type: "RESET_SCORES",
-      });
-    };
-
-    if (hasProgress) {
-      requestConfirm(
-        "Changing the race length will restart the board and reset the scoreboard. Continue?",
-        applyChange
-      );
-    } else {
-      applyChange();
-    }
-  }
-
   function handleResetScores() {
     requestConfirm(
       "Reset the game? This clears the board and resets the scoreboard to zero.",
@@ -334,35 +319,6 @@ export default function App() {
         });
       }
     );
-  }
-
-  function handleDifficultyChange(nextDifficulty) {
-    const applyChange = () => {
-      dispatch({
-        type: "SET_DIFFICULTY",
-        difficulty: nextDifficulty,
-      });
-
-      // Same reasoning — wins against Easy and wins against Unbeatable
-      // shouldn't be tallied together.
-      dispatch({
-        type: "NEW_GAME",
-        resetStartingMark: true,
-      });
-
-      dispatch({
-        type: "RESET_SCORES",
-      });
-    };
-
-    if (hasProgress) {
-      requestConfirm(
-        "Changing the difficulty will restart the board and reset the scoreboard. Continue?",
-        applyChange
-      );
-    } else {
-      applyChange();
-    }
   }
 
   function handleToggleTimer() {
@@ -508,17 +464,12 @@ export default function App() {
             </div>
 
             <SettingsPanel
-              mode={mode}
-              difficulty={difficulty}
-              onDifficultyChange={handleDifficultyChange}
               timerEnabled={timerEnabled}
               onToggleTimer={handleToggleTimer}
               soundOn={soundOn}
               onToggleSound={handleToggleSound}
               theme={theme}
               onToggleTheme={handleToggleTheme}
-              matchTarget={matchTarget}
-              onMatchTargetChange={handleMatchTargetChange}
             />
           </aside>
         </div>
@@ -540,6 +491,7 @@ export default function App() {
           initialDifficulty={difficulty}
           initialNames={playerNames}
           initialMatchTarget={matchTarget}
+          initialHumanMark={humanMark}
           onStart={handleSetupStart}
           onCancel={handleSetupCancel}
           showCancel={hasStartedOnce}

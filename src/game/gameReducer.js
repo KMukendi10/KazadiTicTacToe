@@ -14,6 +14,7 @@ const defaults = {
   playerNames: { X: "Player X", O: "Player O" },
   mode: "pvp", // "pvp" | "vsComputer"
   difficulty: "easy", // "easy" | "unbeatable"
+  humanMark: "X", // which mark the human plays as in vsComputer mode
   timerEnabled: false,
   soundOn: true,
   theme: "dark", // "dark" | "light"
@@ -33,6 +34,7 @@ export function createInitialState() {
     // played last time.
     mode: saved?.mode ?? defaults.mode,
     difficulty: saved?.difficulty ?? defaults.difficulty,
+    humanMark: saved?.humanMark ?? defaults.humanMark,
     timerEnabled: saved?.timerEnabled ?? defaults.timerEnabled,
     soundOn: saved?.soundOn ?? defaults.soundOn,
     theme: saved?.theme ?? defaults.theme,
@@ -183,6 +185,10 @@ export function gameReducer(state, action) {
 
     case "SET_DIFFICULTY": {
       return { ...state, difficulty: action.difficulty };
+    }
+
+    case "SET_HUMAN_MARK": {
+      return { ...state, humanMark: action.mark };
     }
 
     case "TOGGLE_TIMER": {

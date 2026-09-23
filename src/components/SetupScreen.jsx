@@ -5,24 +5,46 @@ export default function SetupScreen({
   initialDifficulty,
   initialNames,
   initialMatchTarget,
+  initialHumanMark,
   onStart,
   onCancel,
   showCancel,
 }) {
   const [mode, setMode] = useState(initialMode);
   const [difficulty, setDifficulty] = useState(initialDifficulty);
+  const [humanMark, setHumanMark] = useState(initialHumanMark ?? "X");
   const [nameX, setNameX] = useState(initialNames.X === "Computer" ? "" : initialNames.X);
   const [nameO, setNameO] = useState(initialNames.O === "Computer" ? "" : initialNames.O);
+  const [humanName, setHumanName] = useState(
+    initialNames[initialHumanMark ?? "X"] === "Computer" ? "" : initialNames[initialHumanMark ?? "X"]
+  );
   const [matchTarget, setMatchTarget] = useState(initialMatchTarget ?? "off");
 
   function handleSubmit(event) {
     event.preventDefault();
+
+    if (mode === "vsComputer") {
+      const trimmedName = humanName.trim() || "Player";
+      onStart({
+        mode,
+        difficulty,
+        humanMark,
+        names: {
+          X: humanMark === "X" ? trimmedName : "Computer",
+          O: humanMark === "O" ? trimmedName : "Computer",
+        },
+        matchTarget: matchTarget === "off" ? null : Number(matchTarget),
+      });
+      return;
+    }
+
     onStart({
       mode,
       difficulty,
+      humanMark,
       names: {
         X: nameX.trim() || "Player X",
-        O: mode === "vsComputer" ? "Computer" : nameO.trim() || "Player O",
+        O: nameO.trim() || "Player O",
       },
       matchTarget: matchTarget === "off" ? null : Number(matchTarget),
     });
@@ -61,13 +83,25 @@ export default function SetupScreen({
         </div>
 
         {mode === "vsComputer" && (
-          <label className="setup-card__field">
-            <span>Difficulty</span>
-            <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
-              <option value="easy">Easy</option>
-              <option value="unbeatable">Unbeatable</option>
-            </select>
-          </label>
+          <div className="setup-card__field">
+            <span>Play as</span>
+            <div className="setup-card__marks">
+              <button
+                type="button"
+                className={`setup-mode${humanMark === "X" ? " setup-mode--active" : ""}`}
+                onClick={() => setHumanMark("X")}
+              >  
+                <span>X</span>
+              </button>
+              <button
+                type="button"
+                className={`setup-mode${humanMark === "O" ? " setup-mode--active" : ""}`}
+                onClick={() => setHumanMark("O")}
+              >
+                <span>O</span>
+              </button>
+            </div>
+          </div>
         )}
 
         <label className="setup-card__field">
@@ -80,29 +114,53 @@ export default function SetupScreen({
           </select>
         </label>
 
-        <label className="setup-card__field">
-          <span>{mode === "vsComputer" ? "Your name (X)" : "Player X name"}</span>
-          <input
-            type="text"
-            maxLength={16}
-            value={nameX}
-            onChange={(e) => setNameX(e.target.value)}
-            placeholder="Player X"
-            autoFocus
-          />
-        </label>
-
-        {mode === "pvp" && (
+        {mode === "vsComputer" && (
           <label className="setup-card__field">
-            <span>Player O name</span>
+            <span>Difficulty</span>
+            <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
+              <option value="easy">Easy</option>
+              <option value="unbeatable">Unbeatable</option>
+            </select>
+          </label>
+        )}
+
+        {mode === "vsComputer" ? (
+          <label className="setup-card__field">
+            <span>Your name</span>
             <input
               type="text"
               maxLength={16}
-              value={nameO}
-              onChange={(e) => setNameO(e.target.value)}
-              placeholder="Player O"
+              value={humanName}
+              onChange={(e) => setHumanName(e.target.value)}
+              placeholder="Player"
+              autoFocus
             />
           </label>
+        ) : (
+          <>
+            <label className="setup-card__field">
+              <span>Player X name</span>
+              <input
+                type="text"
+                maxLength={16}
+                value={nameX}
+                onChange={(e) => setNameX(e.target.value)}
+                placeholder="Player X"
+                autoFocus
+              />
+            </label>
+
+            <label className="setup-card__field">
+              <span>Player O name</span>
+              <input
+                type="text"
+                maxLength={16}
+                value={nameO}
+                onChange={(e) => setNameO(e.target.value)}
+                placeholder="Player O"
+              />
+            </label>
+          </>
         )}
 
         <div className="setup-card__actions">

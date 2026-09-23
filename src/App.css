@@ -845,6 +845,14 @@
   color: var(--text-muted);
 }
 
+.settings-drawer .settings__note {
+  margin: 0 0 1.1rem;
+
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
 .settings-drawer .settings__hint {
   width: 100%;
 
@@ -1223,7 +1231,8 @@
   text-align: center;
 }
 
-.setup-card__modes {
+.setup-card__modes,
+.setup-card__marks {
   display: flex;
   gap: 0.6rem;
 }
