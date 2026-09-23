@@ -28,7 +28,9 @@ export function createInitialState() {
   return {
     ...defaults,
     scores: saved?.scores ?? defaults.scores,
-    playerNames: saved?.playerNames ?? defaults.playerNames,
+    // Player names are intentionally NOT restored — every fresh load starts
+    // back at "Player X" / "Player O" rather than carrying over whoever
+    // played last time.
     mode: saved?.mode ?? defaults.mode,
     difficulty: saved?.difficulty ?? defaults.difficulty,
     timerEnabled: saved?.timerEnabled ?? defaults.timerEnabled,

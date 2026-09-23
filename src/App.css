@@ -1,4 +1,6 @@
 .app {
+  position: relative;
+  z-index: 1;
   max-width: 960px;
   margin: 0 auto;
   padding: 2.5rem 1.5rem 4rem;
@@ -50,9 +52,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 1.25rem;
   flex: 1 1 340px;
   max-width: 380px;
+  min-width: 0;
+  min-height: calc(130px + min(340px, 82vw));
 }
 
 .layout__side {
@@ -74,11 +79,20 @@
   font-family: "Space Grotesk", sans-serif;
   font-size: 1.15rem;
   font-weight: 500;
-  padding: 0.65rem 1.25rem;
+  padding: 0 1.25rem;
   border-radius: 999px;
   background: var(--panel);
   border: 1px solid var(--panel-border);
   color: var(--text);
+  max-width: 100%;
+  /* Must match .turn-indicator's height above, for the same reason. */
+  height: 3rem;
+}
+
+.status span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .status--winner {
@@ -107,6 +121,10 @@
   justify-content: center;
   gap: 0.85rem;
   width: 100%;
+  /* Must match .status's height below so swapping between the
+     turn indicator and the winner/draw pill never changes the
+     row's height. */
+  height: 3rem;
 }
 
 .turn-indicator__vs {
@@ -231,6 +249,7 @@
 }
 
 .square {
+  position: relative;
   background: var(--cell-bg);
   border: 2px solid transparent;
   border-radius: 10px;
@@ -317,6 +336,11 @@
 
 .square:not(:disabled)::before {
   content: attr(data-preview);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: "Space Grotesk", sans-serif;
   font-size: clamp(1.75rem, 8vw, 2.5rem);
   font-weight: 700;
@@ -1053,6 +1077,199 @@
   to {
     opacity: 1;
   }
+}
+
+/* ==========================================
+   ANIMATED BACKGROUND
+   ========================================== */
+
+.game-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.game-bg__glow {
+  position: absolute;
+  width: 46vmax;
+  height: 46vmax;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.28;
+  animation: bg-glow-pulse 16s ease-in-out infinite;
+}
+
+.game-bg__glow--x {
+  top: -10%;
+  left: -10%;
+  background: var(--accent-x);
+}
+
+.game-bg__glow--o {
+  bottom: -15%;
+  right: -10%;
+  background: var(--accent-o);
+  animation-delay: -8s;
+}
+
+@keyframes bg-glow-pulse {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(6%, 6%) scale(1.15);
+  }
+}
+
+.game-bg__shape {
+  position: absolute;
+  opacity: 0.1;
+  transition: transform 0.3s ease-out;
+}
+
+.game-bg__drift {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: bg-drift 14s ease-in-out infinite;
+}
+
+.game-bg__drift .mark-icon {
+  width: 100%;
+  height: 100%;
+  stroke-width: 6;
+}
+
+@keyframes bg-drift {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  50% {
+    transform: translate(16px, -14px) rotate(10deg);
+  }
+}
+
+/* ==========================================
+   SETUP SCREEN
+   ========================================== */
+
+.setup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  animation: settings-overlay-in 0.15s ease;
+}
+
+.setup-card {
+  width: min(400px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 18px;
+  padding: 1.75rem;
+
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.4);
+  animation: confirm-dialog-in 0.18s ease;
+}
+
+.setup-card__title {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.setup-card__subtitle {
+  margin: -0.7rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.setup-card__modes {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.setup-mode {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+
+  padding: 0.9rem 0.5rem;
+
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--text-muted);
+
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.setup-mode__icon {
+  font-size: 1.4rem;
+}
+
+.setup-mode--active {
+  border-color: var(--accent-x);
+  color: var(--text);
+  background: var(--accent-x-soft);
+}
+
+.setup-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.setup-card__field input,
+.setup-card__field select {
+  background: var(--input-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 0.55rem 0.7rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.setup-card__actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+}
+
+.setup-card__actions .btn {
+  flex: 1;
 }
 
 /* ==========================================
