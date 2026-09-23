@@ -50,9 +50,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 1.25rem;
   flex: 1 1 340px;
   max-width: 380px;
+  min-width: 0;
+  min-height: calc(130px + min(340px, 82vw));
 }
 
 .layout__side {
@@ -74,11 +77,20 @@
   font-family: "Space Grotesk", sans-serif;
   font-size: 1.15rem;
   font-weight: 500;
-  padding: 0.65rem 1.25rem;
+  padding: 0 1.25rem;
   border-radius: 999px;
   background: var(--panel);
   border: 1px solid var(--panel-border);
   color: var(--text);
+  max-width: 100%;
+  /* Must match .turn-indicator's height above, for the same reason. */
+  height: 3rem;
+}
+
+.status span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .status--winner {
@@ -107,6 +119,10 @@
   justify-content: center;
   gap: 0.85rem;
   width: 100%;
+  /* Must match .status's height below so swapping between the
+     turn indicator and the winner/draw pill never changes the
+     row's height. */
+  height: 3rem;
 }
 
 .turn-indicator__vs {
@@ -231,6 +247,7 @@
 }
 
 .square {
+  position: relative;
   background: var(--cell-bg);
   border: 2px solid transparent;
   border-radius: 10px;
@@ -317,6 +334,11 @@
 
 .square:not(:disabled)::before {
   content: attr(data-preview);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: "Space Grotesk", sans-serif;
   font-size: clamp(1.75rem, 8vw, 2.5rem);
   font-weight: 700;

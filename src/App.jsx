@@ -85,11 +85,12 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Persist scores + settings across refreshes.
+  // Persist scores + settings across refreshes. Player names are deliberately
+  // excluded — a fresh load should always start at the defaults, not whoever
+  // played last.
   useEffect(() => {
     saveState({
       scores,
-      playerNames,
       mode,
       difficulty,
       timerEnabled,
@@ -99,7 +100,6 @@ export default function App() {
     });
   }, [
     scores,
-    playerNames,
     mode,
     difficulty,
     timerEnabled,
@@ -465,23 +465,27 @@ export default function App() {
         <span>Settings</span>
       </button>
 
-      {/* Full reset — new players, fresh scoreboard.
-          Nothing to start over from until a move has been made or a
-          round has been won, so it stays disabled until then. */}
-      <button
-        className="startover-trigger"
-        type="button"
-        onClick={handleStartOver}
-        disabled={!hasProgress}
-        title={
-          hasProgress
-            ? undefined
-            : "Nothing to start over yet — make a move first"
-        }
-      >
-        <span aria-hidden="true">↺</span>
-        <span>Start Over</span>
-      </button>
+      {/* Full reset — new players, fresh scoreboard. Only relevant in
+          Race to N mode, since normal mode already has New Game for
+          a fresh round and Reset Game for the scoreboard. Nothing to
+          start over from until a move has been made or a round has
+          been won, so it stays disabled until then. */}
+      {matchTarget && (
+        <button
+          className="startover-trigger"
+          type="button"
+          onClick={handleStartOver}
+          disabled={!hasProgress}
+          title={
+            hasProgress
+              ? undefined
+              : "Nothing to start over yet — make a move first"
+          }
+        >
+          <span aria-hidden="true">↺</span>
+          <span>Start Over</span>
+        </button>
+      )}
 
       {/* Settings sidebar */}
       {settingsOpen && (
