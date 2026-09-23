@@ -4,6 +4,7 @@ export default function SetupScreen({
   initialMode,
   initialDifficulty,
   initialNames,
+  initialMatchTarget,
   onStart,
   onCancel,
   showCancel,
@@ -12,6 +13,7 @@ export default function SetupScreen({
   const [difficulty, setDifficulty] = useState(initialDifficulty);
   const [nameX, setNameX] = useState(initialNames.X === "Computer" ? "" : initialNames.X);
   const [nameO, setNameO] = useState(initialNames.O === "Computer" ? "" : initialNames.O);
+  const [matchTarget, setMatchTarget] = useState(initialMatchTarget ?? "off");
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -22,6 +24,7 @@ export default function SetupScreen({
         X: nameX.trim() || "Player X",
         O: mode === "vsComputer" ? "Computer" : nameO.trim() || "Player O",
       },
+      matchTarget: matchTarget === "off" ? null : Number(matchTarget),
     });
   }
 
@@ -66,6 +69,16 @@ export default function SetupScreen({
             </select>
           </label>
         )}
+
+        <label className="setup-card__field">
+          <span>Race to</span>
+          <select value={matchTarget} onChange={(e) => setMatchTarget(e.target.value)}>
+            <option value="off">Off</option>
+            <option value="3">3 wins</option>
+            <option value="5">5 wins</option>
+            <option value="10">10 wins</option>
+          </select>
+        </label>
 
         <label className="setup-card__field">
           <span>{mode === "vsComputer" ? "Your name (X)" : "Player X name"}</span>

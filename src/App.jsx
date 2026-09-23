@@ -233,7 +233,7 @@ export default function App() {
     });
   }
 
-  function handleSetupStart({ mode: chosenMode, difficulty: chosenDifficulty, names }) {
+  function handleSetupStart({ mode: chosenMode, difficulty: chosenDifficulty, names, matchTarget: chosenMatchTarget }) {
     dispatch({
       type: "SET_MODE",
       mode: chosenMode,
@@ -256,6 +256,11 @@ export default function App() {
       type: "SET_PLAYER_NAME",
       mark: "O",
       name: names.O,
+    });
+
+    dispatch({
+      type: "SET_MATCH_TARGET",
+      target: chosenMatchTarget,
     });
 
     dispatch({
@@ -534,6 +539,7 @@ export default function App() {
           initialMode={mode}
           initialDifficulty={difficulty}
           initialNames={playerNames}
+          initialMatchTarget={matchTarget}
           onStart={handleSetupStart}
           onCancel={handleSetupCancel}
           showCancel={hasStartedOnce}
