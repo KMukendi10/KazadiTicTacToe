@@ -14,6 +14,8 @@ import Confetti from "./components/Confetti";
 import MatchBanner from "./components/MatchBanner";
 import Loader from "./components/Loader";
 import ConfirmDialog from "./components/ConfirmDialog";
+import SetupScreen from "./components/SetupScreen";
+import GameBackground from "./components/GameBackground";
 import "./App.css";
 
 const TURN_SECONDS = 10;
@@ -26,6 +28,8 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);
   const [confirmState, setConfirmState] = useState(null);
+  const [setupOpen, setSetupOpen] = useState(true);
+  const [hasStartedOnce, setHasStartedOnce] = useState(false);
 
   const {
     history,
@@ -85,11 +89,12 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Persist scores + settings across refreshes.
+  // Persist scores + settings across refreshes. Player names are deliberately
+  // excluded — a fresh load should always start at the defaults, not whoever
+  // played last.
   useEffect(() => {
     saveState({
       scores,
-      playerNames,
       mode,
       difficulty,
       timerEnabled,
@@ -99,7 +104,6 @@ export default function App() {
     });
   }, [
     scores,
-    playerNames,
     mode,
     difficulty,
     timerEnabled,
@@ -115,7 +119,7 @@ export default function App() {
 
   // Computer's move.
   useEffect(() => {
-    if (!isComputerTurn || isLoading) return;
+    if (!isComputerTurn || isLoading || setupOpen) return;
 
     const timeout = setTimeout(() => {
       const move = getComputerMove(
@@ -137,11 +141,11 @@ export default function App() {
 
     // currentSquares changes identity every move.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isComputerTurn, currentSquares, difficulty, isLoading]);
+  }, [isComputerTurn, currentSquares, difficulty, isLoading, setupOpen]);
 
   // Turn timer.
   useEffect(() => {
-    if (!timerActive || isLoading) return undefined;
+    if (!timerActive || isLoading || setupOpen) return undefined;
 
     setSecondsLeft(TURN_SECONDS);
 
@@ -150,7 +154,7 @@ export default function App() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timerActive, currentMove, isLoading]);
+  }, [timerActive, currentMove, isLoading, setupOpen]);
 
   // Automatically make a random move when timer reaches zero.
   useEffect(() => {
@@ -229,33 +233,58 @@ export default function App() {
     });
   }
 
-  function handleNewMatch() {
+  function handleSetupStart({ mode: chosenMode, difficulty: chosenDifficulty, names }) {
+    dispatch({
+      type: "SET_MODE",
+      mode: chosenMode,
+    });
+
+    if (chosenMode === "vsComputer") {
+      dispatch({
+        type: "SET_DIFFICULTY",
+        difficulty: chosenDifficulty,
+      });
+    }
+
+    dispatch({
+      type: "SET_PLAYER_NAME",
+      mark: "X",
+      name: names.X,
+    });
+
+    dispatch({
+      type: "SET_PLAYER_NAME",
+      mark: "O",
+      name: names.O,
+    });
+
     dispatch({
       type: "NEW_GAME",
       resetStartingMark: true,
     });
+
     dispatch({
       type: "RESET_SCORES",
     });
+
+    setHasStartedOnce(true);
+    setSetupOpen(false);
+  }
+
+  function handleSetupCancel() {
+    setSetupOpen(false);
+  }
+
+  function handleNewMatch() {
+    // Starting a new match means new names/mode are worth asking about again.
+    setSetupOpen(true);
   }
 
   // A bigger reset than "New Match" — for when the people playing are
-  // changing, not just the score. Wipes everything and opens Settings
-  // so new names can be entered right away.
+  // changing, not just the score. Reopens the setup screen (pre-filled
+  // with the current mode/names) so it can be confirmed as-is or changed.
   function handleStartOver() {
-    requestConfirm(
-      "Start over? This clears the board and resets the scoreboard to zero.",
-      () => {
-        dispatch({
-          type: "NEW_GAME",
-          resetStartingMark: true,
-        });
-        dispatch({
-          type: "RESET_SCORES",
-        });
-        setSettingsOpen(true);
-      }
-    );
+    setSetupOpen(true);
   }
 
   function handleMatchTargetChange(target) {
@@ -438,18 +467,23 @@ export default function App() {
   }
 
   return (
-    <div className="app">
-      <header className="app__header">
-        <img
-          src="/logo.png"
-          alt=""
-          className="app__logo"
-        />
+    <>
+      <GameBackground />
 
-        <h1>Tic Tac Toe</h1>
+      <div className="app">
+      <header className="app__header">
+        <div className="app__title-row">
+          <img
+            src="/logo.png"
+            alt=""
+            className="app__logo"
+          />
+
+          <h1>Tic Tac Toe</h1>
+        </div>
 
         <p className="app__subtitle">
-          Take turns, get three in a row.
+          9 squares, 8 lines, 1 winner.
         </p>
       </header>
 
@@ -465,19 +499,12 @@ export default function App() {
         <span>Settings</span>
       </button>
 
-      {/* Full reset — new players, fresh scoreboard.
-          Nothing to start over from until a move has been made or a
-          round has been won, so it stays disabled until then. */}
+      {/* Full reset — reopens the setup screen (pre-filled with the current
+          mode/names) so a fresh match can be confirmed as-is or reconfigured. */}
       <button
         className="startover-trigger"
         type="button"
         onClick={handleStartOver}
-        disabled={!hasProgress}
-        title={
-          hasProgress
-            ? undefined
-            : "Nothing to start over yet — make a move first"
-        }
       >
         <span aria-hidden="true">↺</span>
         <span>Start Over</span>
@@ -538,6 +565,18 @@ export default function App() {
           message={confirmState.message}
           onConfirm={handleConfirmYes}
           onCancel={handleConfirmCancel}
+        />
+      )}
+
+      {/* Mandatory on first load; reopened by Start Over / Start New Match */}
+      {setupOpen && (
+        <SetupScreen
+          initialMode={mode}
+          initialDifficulty={difficulty}
+          initialNames={playerNames}
+          onStart={handleSetupStart}
+          onCancel={handleSetupCancel}
+          showCancel={hasStartedOnce}
         />
       )}
 
@@ -604,6 +643,7 @@ export default function App() {
           />
         </div>
       </main>
-    </div>
+      </div>
+    </>
   );
 }

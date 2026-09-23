@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { gameReducer, createInitialState } from "./gameReducer";
 
 function playMoves(state, indices) {
@@ -172,5 +172,33 @@ describe("gameReducer", () => {
 
     state = gameReducer(state, { type: "SET_MATCH_TARGET", target: null });
     expect(state.matchTarget).toBeNull();
+  });
+
+  describe("createInitialState", () => {
+    const originalLocalStorage = globalThis.localStorage;
+
+    beforeEach(() => {
+      globalThis.localStorage = {
+        getItem: vi.fn(() =>
+          JSON.stringify({
+            scores: { X: 4, O: 2, draws: 1 },
+            playerNames: { X: "Kazadi", O: "Rival" },
+            mode: "vsComputer",
+          })
+        ),
+        setItem: vi.fn(),
+      };
+    });
+
+    afterEach(() => {
+      globalThis.localStorage = originalLocalStorage;
+    });
+
+    it("restores scores and settings from storage, but never restores player names", () => {
+      const state = createInitialState();
+      expect(state.scores).toEqual({ X: 4, O: 2, draws: 1 });
+      expect(state.mode).toBe("vsComputer");
+      expect(state.playerNames).toEqual({ X: "Player X", O: "Player O" });
+    });
   });
 });
