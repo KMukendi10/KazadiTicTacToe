@@ -497,12 +497,19 @@ export default function App() {
         <span>Settings</span>
       </button>
 
-      {/* Full reset — reopens the setup screen (pre-filled with the current
-          mode/names) so a fresh match can be confirmed as-is or reconfigured. */}
+      {/* Full reset — new players, fresh scoreboard.
+          Nothing to start over from until a move has been made or a
+          round has been won, so it stays disabled until then. */}
       <button
         className="startover-trigger"
         type="button"
         onClick={handleStartOver}
+        disabled={!hasProgress}
+        title={
+          hasProgress
+            ? undefined
+            : "Nothing to start over yet — make a move first"
+        }
       >
         <span aria-hidden="true">↺</span>
         <span>Start Over</span>
