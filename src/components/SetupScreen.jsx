@@ -42,7 +42,7 @@ export default function SetupScreen({
             <span className="setup-mode__icon" aria-hidden="true">
               🧑‍🤝‍🧑
             </span>
-            <span>2 Players</span>
+            <span>Multiplayer</span>
           </button>
 
           <button
