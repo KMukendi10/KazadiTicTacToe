@@ -85,8 +85,6 @@ export default function SettingsPanel({
             onKeyDown={handleEnterCommit(commitDifficulty)}
           >
             <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
             <option value="unbeatable">Unbeatable</option>
           </select>
           <p className="settings__hint">Press Enter to apply</p>
