@@ -831,6 +831,7 @@
 
 .settings-drawer .settings__row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
 
@@ -842,6 +843,18 @@
 .settings-drawer .settings__label {
   font-size: 0.85rem;
   color: var(--text-muted);
+}
+
+.settings-drawer .settings__hint {
+  width: 100%;
+
+  margin: 0.2rem 0 0;
+
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-align: right;
+
+  opacity: 0.8;
 }
 
 /* Settings inputs */

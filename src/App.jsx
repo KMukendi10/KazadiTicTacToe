@@ -331,43 +331,6 @@ export default function App() {
     );
   }
 
-  function handleNameChange(mark, name) {
-    dispatch({
-      type: "SET_PLAYER_NAME",
-      mark,
-      name,
-    });
-  }
-
-  function handleModeChange(nextMode) {
-    const applyChange = () => {
-      dispatch({
-        type: "SET_MODE",
-        mode: nextMode,
-      });
-
-      // A PvP scoreboard and a vs-Computer scoreboard aren't the same contest —
-      // wipe both the board and the tally so nothing carries over.
-      dispatch({
-        type: "NEW_GAME",
-        resetStartingMark: true,
-      });
-
-      dispatch({
-        type: "RESET_SCORES",
-      });
-    };
-
-    if (hasProgress) {
-      requestConfirm(
-        "Changing the opponent will restart the board and reset the scoreboard. Continue?",
-        applyChange
-      );
-    } else {
-      applyChange();
-    }
-  }
-
   function handleDifficultyChange(nextDifficulty) {
     const applyChange = () => {
       dispatch({
@@ -540,10 +503,7 @@ export default function App() {
             </div>
 
             <SettingsPanel
-              playerNames={playerNames}
-              onNameChange={handleNameChange}
               mode={mode}
-              onModeChange={handleModeChange}
               difficulty={difficulty}
               onDifficultyChange={handleDifficultyChange}
               timerEnabled={timerEnabled}
