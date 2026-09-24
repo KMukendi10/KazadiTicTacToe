@@ -239,10 +239,6 @@ export default function App() {
     setConfirmState({ message, onConfirm });
   }
 
-  function requestAlert(message) {
-    setConfirmState({ message, onConfirm: () => {}, showCancel: false, confirmLabel: "OK" });
-  }
-
   function handleConfirmYes() {
     confirmState?.onConfirm();
     setConfirmState(null);
@@ -270,7 +266,14 @@ export default function App() {
 
   function handleNewGame() {
     if (!gameOver) {
-      requestAlert("Finish the current round first — there's no winner or draw yet.");
+      requestConfirm(
+        "Finish the current round first — there's no winner or draw yet. Restart it anyway?",
+        () => {
+          dispatch({
+            type: "NEW_GAME",
+          });
+        }
+      );
       return;
     }
 
