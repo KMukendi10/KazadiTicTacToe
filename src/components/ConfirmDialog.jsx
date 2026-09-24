@@ -1,4 +1,10 @@
-export default function ConfirmDialog({ message, onConfirm, onCancel }) {
+export default function ConfirmDialog({
+  message,
+  onConfirm,
+  onCancel,
+  confirmLabel = "Continue",
+  showCancel = true,
+}) {
   return (
     <div className="confirm-overlay" role="presentation" onClick={onCancel}>
       <div
@@ -10,11 +16,13 @@ export default function ConfirmDialog({ message, onConfirm, onCancel }) {
       >
         <p className="confirm-dialog__message">{message}</p>
         <div className="confirm-dialog__actions">
-          <button className="btn" onClick={onCancel}>
-            Cancel
-          </button>
+          {showCancel && (
+            <button className="btn" onClick={onCancel}>
+              Cancel
+            </button>
+          )}
           <button className="btn btn--primary" onClick={onConfirm}>
-            Continue
+            {confirmLabel}
           </button>
         </div>
       </div>

@@ -477,7 +477,16 @@
 
 .button-row {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 0.6rem;
+}
+
+.next-round-countdown {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
 }
 
 .btn {
@@ -693,7 +702,8 @@
 }
 
 .settings-trigger span:first-child {
-  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
 }
 
 .startover-trigger {
@@ -741,7 +751,8 @@
 }
 
 .startover-trigger span:first-child {
-  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
 }
 
 /* Full-screen layer */

@@ -21,6 +21,7 @@ import { GearIcon, UndoIcon } from "./components/icons";
 import "./App.css";
 
 const TURN_SECONDS = 10;
+const NEXT_ROUND_SECONDS = 12;
 const LOADER_DURATION_MS = 2500;
 
 export default function App() {
@@ -69,9 +70,15 @@ export default function App() {
 
   const [secondsLeft, setSecondsLeft] = useState(TURN_SECONDS);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [nextRoundSecondsLeft, setNextRoundSecondsLeft] = useState(NEXT_ROUND_SECONDS);
 
   const timerActive =
     timerEnabled && !gameOver && !isComputerTurn;
+
+  // Whether the round just ended and nothing else is covering the screen —
+  // if so, count down to automatically starting the next round.
+  const autoAdvanceActive =
+    gameOver && !matchOver && !setupOpen && !settingsOpen && !confirmState && !isLoading;
 
   // Splash screen with a progress bar that fills up to 100%.
   useEffect(() => {
@@ -177,6 +184,31 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [secondsLeft, timerActive]);
 
+  // Countdown to automatically starting the next round once one has ended,
+  // so players aren't stuck waiting on someone to click "New Game".
+  useEffect(() => {
+    if (!autoAdvanceActive) return undefined;
+
+    setNextRoundSecondsLeft(NEXT_ROUND_SECONDS);
+
+    const interval = setInterval(() => {
+      setNextRoundSecondsLeft((s) => s - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [autoAdvanceActive, history.length]);
+
+  // Kick off the next round once that countdown reaches zero.
+  useEffect(() => {
+    if (!autoAdvanceActive || nextRoundSecondsLeft > 0) return;
+
+    dispatch({
+      type: "NEW_GAME",
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nextRoundSecondsLeft, autoAdvanceActive]);
+
   // Play move sound.
   const prevHistoryLength = useRef(history.length);
 
@@ -207,6 +239,10 @@ export default function App() {
     setConfirmState({ message, onConfirm });
   }
 
+  function requestAlert(message) {
+    setConfirmState({ message, onConfirm: () => {}, showCancel: false, confirmLabel: "OK" });
+  }
+
   function handleConfirmYes() {
     confirmState?.onConfirm();
     setConfirmState(null);
@@ -233,6 +269,11 @@ export default function App() {
   }
 
   function handleNewGame() {
+    if (!gameOver) {
+      requestAlert("Finish the current round first — there's no winner or draw yet.");
+      return;
+    }
+
     dispatch({
       type: "NEW_GAME",
     });
@@ -477,12 +518,15 @@ export default function App() {
         </div>
       )}
 
-      {/* Confirmation dialog for anything that would restart the game */}
+      {/* Confirmation dialog for anything that would restart the game,
+          and plain alerts (e.g. "finish the round first") when showCancel is false */}
       {confirmState && (
         <ConfirmDialog
           message={confirmState.message}
           onConfirm={handleConfirmYes}
           onCancel={handleConfirmCancel}
+          confirmLabel={confirmState.confirmLabel}
+          showCancel={confirmState.showCancel ?? true}
         />
       )}
 
@@ -545,6 +589,12 @@ export default function App() {
               >
                 New Game
               </button>
+
+              {autoAdvanceActive && (
+                <span className="next-round-countdown">
+                  Next round in {nextRoundSecondsLeft}s
+                </span>
+              )}
             </div>
           )}
         </div>
