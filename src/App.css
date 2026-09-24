@@ -246,7 +246,8 @@
 }
 
 .match-banner__trophy {
-  font-size: 2rem;
+  display: inline-flex;
+  color: var(--accent-o);
   line-height: 1;
 }
 
@@ -1289,7 +1290,9 @@
 }
 
 .setup-mode__icon {
-  font-size: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .setup-mode--active {

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PeopleIcon, RobotIcon } from "./icons";
 
 export default function SetupScreen({
   initialMode,
@@ -65,7 +66,7 @@ export default function SetupScreen({
             onClick={() => setMode("pvp")}
           >
             <span className="setup-mode__icon" aria-hidden="true">
-              🧑‍🤝‍🧑
+              <PeopleIcon size={22} />
             </span>
             <span>Multiplayer</span>
           </button>
@@ -76,7 +77,7 @@ export default function SetupScreen({
             onClick={() => setMode("vsComputer")}
           >
             <span className="setup-mode__icon" aria-hidden="true">
-              🤖
+              <RobotIcon size={22} />
             </span>
             <span>vs Computer</span>
           </button>

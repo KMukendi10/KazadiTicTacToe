@@ -17,6 +17,7 @@ import Loader from "./components/Loader";
 import ConfirmDialog from "./components/ConfirmDialog";
 import SetupScreen from "./components/SetupScreen";
 import GameBackground from "./components/GameBackground";
+import { GearIcon, UndoIcon } from "./components/icons";
 import "./App.css";
 
 const TURN_SECONDS = 10;
@@ -420,7 +421,7 @@ export default function App() {
         aria-label="Open game settings"
         aria-expanded={settingsOpen}
       >
-        <span aria-hidden="true">⚙</span>
+        <span aria-hidden="true"><GearIcon /></span>
         <span>Settings</span>
       </button>
 
@@ -431,7 +432,7 @@ export default function App() {
         type="button"
         onClick={handleStartOver}
       >
-        <span aria-hidden="true">↺</span>
+        <span aria-hidden="true"><UndoIcon /></span>
         <span>Start Over</span>
       </button>
 
