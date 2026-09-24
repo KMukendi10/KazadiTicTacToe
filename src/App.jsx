@@ -6,6 +6,7 @@ import { markForMove, otherMark } from "./game/turns";
 import { playMoveSound, playWinSound, playDrawSound } from "./game/sound";
 import { saveState } from "./game/storage";
 import Board from "./components/Board";
+import MatchMeta from "./components/MatchMeta";
 import StatusBar from "./components/StatusBar";
 import Scoreboard from "./components/Scoreboard";
 import MoveHistory from "./components/MoveHistory";
@@ -500,6 +501,8 @@ export default function App() {
 
       <main className="layout">
         <div className="layout__game">
+          <MatchMeta mode={mode} matchTarget={matchTarget} />
+
           {matchOver ? (
             <MatchBanner
               winnerName={playerNames[matchWinnerMark]?.trim() || `Player ${matchWinnerMark}`}
