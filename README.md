@@ -1,11 +1,26 @@
 # Tic Tac Toe
 
-React TicTacToe built for the "First Day as a JR Frontend Intern" assignment.
+React TicTacToe built for the "First Day as a JR Frontend Intern" assignment (iHub / Zaio, due Sep 27).
+
+🔗 **Live demo:** [ADD-VERCEL-OR-NETLIFY-LINK-HERE]
+📦 **Repo:** [ADD-GITHUB-LINK-HERE]
+🎥 **Loom walkthrough:** [ADD-LOOM-LINK-HERE]
 
 ## Stack
 - Vite + React 19
 - `useReducer` for all game state (no external store)
 - Vitest for unit tests
+
+## Rubric coverage
+
+| Rubric item | Where it lives |
+|---|---|
+| Base game (40) | `src/game/calculateWinner.js`, `src/game/turns.js`, `App.jsx` |
+| Manual feature — no AI (15) | Scoreboard, `src/components/Scoreboard.jsx` |
+| State management (20) | Single reducer, `src/game/gameReducer.js` (`MAKE_MOVE`, `JUMP_TO_MOVE`, `NEW_GAME`, `RESET_SCORES`, `SET_MODE`, `SET_DIFFICULTY`, `SET_HUMAN_MARK`, `SET_PLAYER_NAME`, `SET_MATCH_TARGET`, `TOGGLE_TIMER`, `TOGGLE_SOUND`, `SET_THEME`) |
+| Advanced feature (15) | Move History + Time Travel, `src/components/MoveHistory.jsx` |
+| Loom video (10) | see link above |
+| Deployment (10) | see link above |
 
 ## Core features
 - Full 3x3 game with turn alternation, invalid-move prevention, win/draw detection
