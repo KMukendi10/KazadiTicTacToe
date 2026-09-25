@@ -2,9 +2,7 @@
 
 React TicTacToe built for the "First Day as a JR Frontend Intern" assignment (iHub / Zaio, due Sep 27).
 
-🔗 **Live demo:** [ADD-VERCEL-OR-NETLIFY-LINK-HERE]
-📦 **Repo:** [ADD-GITHUB-LINK-HERE]
-🎥 **Loom walkthrough:** [ADD-LOOM-LINK-HERE]
+🔗 **Live demo:** [https://kazadi-tic-tac-toe.vercel.app/]
 
 ## Stack
 - Vite + React 19
