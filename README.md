@@ -1,6 +1,6 @@
-# Tic Tac Toe
+# Kazadi Tic Tac Toe
 
-React TicTacToe built for the "First Day as a JR Frontend Intern" assignment (iHub / Zaio, due Sep 27).
+A feature-rich Tic Tac Toe game built with React, featuring multiple game modes, configurable settings, move history, time travel, and persistent scores.
 
 🔗 **Live demo:** [https://kazadi-tic-tac-toe.vercel.app/]
 
@@ -57,3 +57,6 @@ npm test
 ```
 npm run build
 ```
+## Author
+
+Kazadi Mukendi
